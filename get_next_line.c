@@ -6,7 +6,7 @@
 /*   By: gcollett <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/16 06:03:03 by gcollett          #+#    #+#             */
-/*   Updated: 2017/03/21 20:27:21 by gcollett         ###   ########.fr       */
+/*   Updated: 2017/03/21 20:28:34 by gcollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ t_memory		*free_factory(t_memory *save)
 {
 	t_memory	*tmp;
 
+	tmp = NULL;
 	if (save->prev)
 		(save->prev)->next = save->next;
 	if (save->prev)
