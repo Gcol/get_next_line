@@ -6,7 +6,7 @@
 /*   By: gcollett <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/16 06:03:03 by gcollett          #+#    #+#             */
-/*   Updated: 2017/03/06 01:20:57 by gcollett         ###   ########.fr       */
+/*   Updated: 2017/03/21 20:27:21 by gcollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,37 +14,38 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
+t_memory		*free_factory(t_memory *save)
+{
+	t_memory	*tmp;
+
+	if (save->prev)
+		(save->prev)->next = save->next;
+	if (save->prev)
+		tmp = (save->prev);
+	else if (save->next)
+		tmp = save->next;
+	free(save);
+	return (tmp);
+}
+
 t_memory		*init_struct(t_memory *save, int fd)
 {
-	int					state;
 	t_memory			*recup;
-	int					cmp;
 
 	recup = save;
-	state = 0;
-	cmp = 0;
 	if (save)
-		while (state != 2)
-		{
-			if (save->fd == fd || cmp == 10)
-				break ;
-			state = (!save->prev && state == 0) ? 1 : state;
-			state = (!save->next && state == 1) ? 2 : state;
-			if (state == 0)
-				save = save->prev;
-			else
-				save = save->next;
-			if (save)
-				if (save->fd)
-					printf("Save->fd = %d\n",save->fd);
-		}
+	{
+		while (save->prev && save->fd != fd)
+			save = save->prev;
+		while (save->next && save->fd != fd)
+			save = save->next;
+	}
 	if (!save || save->fd != fd)
 	{
-		save = NULL;
 		save = malloc(sizeof(t_memory));
 		save->fd = (int)fd;
 		save->prev = recup;
-		if (recup != save && recup)
+		if (recup)
 			recup->next = save;
 		save->next = NULL;
 		save->pm = 1;
@@ -68,11 +69,7 @@ static int		ft_attrib(char **line, t_memory *save, int cmp, int p)
 			p = -1;
 			if (!save->buf[0])
 			{
-				if (save->prev)
-					(save->prev)->next = save->next;
-				if(save->next)
-					(save->next)->prev = save->prev;
-				free(save);
+				save = free_factory(save);
 				return (0);
 			}
 		}
@@ -91,16 +88,16 @@ int				get_next_line(const int fd, char **line)
 	if (fd < 0 || !BUFF_SIZE || !line)
 		return (-1);
 	save = init_struct(save, fd);
+	if (save->pm < 1 && save->buf[0] == '\0')
+	{
+		return (save->pm);
+	}
 	if (save->pm < 1)
 		return (save->pm);
 	if (save->buf[0] == '\0')
 		if ((save->pm = read(save->fd, save->buf, BUFF_SIZE)) < 1)
 		{
-			if (save->prev)
-				(save->prev)->next = save->next;
-			if(save->next)
-				(save->next)->prev = save->prev;
-			free(save);
+			save = free_factory(save);
 			return (read(fd, "", BUFF_SIZE));
 		}
 	*line = ft_memalloc(BUFF_SIZE + 1);

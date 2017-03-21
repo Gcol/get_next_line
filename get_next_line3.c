@@ -6,7 +6,7 @@
 /*   By: gcollett <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/16 06:03:03 by gcollett          #+#    #+#             */
-/*   Updated: 2017/03/20 13:35:44 by gcollett         ###   ########.fr       */
+/*   Updated: 2017/03/20 13:35:10 by gcollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,47 +14,33 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
-void			print_struc(t_memory *save)
-{
-	while(save->prev)
-		save = save->prev;
-	while (save)
-	{
-		printf("save->fd = %d\n",save->fd);
-		printf("save->pm = %d\n",save->pm);
-		printf("save->buf = %s\n",save->buf);
-		if (save->prev)
-			printf("save->prev = %\n",(save->prev)fd);
-		if (save->next)
-			printf("save->next = %d\n",(save->next)fd);
-	}
-}
-
 t_memory		*init_struct(t_memory *save, int fd)
 {
 	int					state;
 	t_memory			*recup;
+	int					cmp;
 
-	state = 0;
 	recup = save;
-	print_struct(save);
+	state = 0;
+	cmp = 0;
 	if (save)
-	{
 		while (state != 2)
 		{
-			if (save->fd == fd)
+			if (save->fd == fd || cmp == 10)
 				break ;
 			state = (!save->prev && state == 0) ? 1 : state;
 			state = (!save->next && state == 1) ? 2 : state;
-			save = (state == 0) ? save->prev : save->next;
+			if (state == 0)
+				save = save->prev;
+			if (state == 1)
+				save = save->next;
 		}
-	}
 	if (!save || save->fd != fd)
 	{
 		save = malloc(sizeof(t_memory));
 		save->fd = (int)fd;
 		save->prev = recup;
-		if (recup)
+		if (recup != save && recup)
 			recup->next = save;
 		save->next = NULL;
 		save->pm = 1;
@@ -80,6 +66,8 @@ static int		ft_attrib(char **line, t_memory *save, int cmp, int p)
 			{
 				if (save->prev)
 					(save->prev)->next = save->next;
+				if(save->next)
+					(save->next)->prev = save->prev;
 				free(save);
 				return (0);
 			}
@@ -99,15 +87,15 @@ int				get_next_line(const int fd, char **line)
 	if (fd < 0 || !BUFF_SIZE || !line)
 		return (-1);
 	save = init_struct(save, fd);
-	if (save->pm < 1 && save->buf[0] == '\0')
-	{
-		return (save->pm);
-	}
 	if (save->pm < 1)
 		return (save->pm);
 	if (save->buf[0] == '\0')
 		if ((save->pm = read(save->fd, save->buf, BUFF_SIZE)) < 1)
 		{
+			if (save->prev)
+				(save->prev)->next = save->next;
+			if(save->next)
+				(save->next)->prev = save->prev;
 			free(save);
 			return (read(fd, "", BUFF_SIZE));
 		}
