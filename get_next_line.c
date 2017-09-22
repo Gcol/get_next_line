@@ -6,7 +6,7 @@
 /*   By: gcollett <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/16 06:03:03 by gcollett          #+#    #+#             */
-/*   Updated: 2017/03/21 20:28:34 by gcollett         ###   ########.fr       */
+/*   Updated: 2017/03/28 01:51:07 by gcollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ t_memory		*free_factory(t_memory *save)
 		tmp = (save->prev);
 	else if (save->next)
 		tmp = save->next;
+	save->buf[0] = '\0';
+	free(save->buf);
 	free(save);
 	return (tmp);
 }
@@ -50,7 +52,7 @@ t_memory		*init_struct(t_memory *save, int fd)
 			recup->next = save;
 		save->next = NULL;
 		save->pm = 1;
-		ft_bzero(save->buf, BUFF_SIZE + 1);
+		save->buf = ft_memalloc(BUFF_SIZE + 1);
 	}
 	return (save);
 }
@@ -86,7 +88,7 @@ int				get_next_line(const int fd, char **line)
 {
 	static	t_memory	*save;
 
-	if (fd < 0 || !BUFF_SIZE || !line)
+	if (fd < 0 || !BUFF_SIZE || BUFF_SIZE < 1 || !line)
 		return (-1);
 	save = init_struct(save, fd);
 	if (save->pm < 1 && save->buf[0] == '\0')
@@ -98,6 +100,7 @@ int				get_next_line(const int fd, char **line)
 	if (save->buf[0] == '\0')
 		if ((save->pm = read(save->fd, save->buf, BUFF_SIZE)) < 1)
 		{
+			*line = NULL;
 			save = free_factory(save);
 			return (read(fd, "", BUFF_SIZE));
 		}

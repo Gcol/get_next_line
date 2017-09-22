@@ -6,19 +6,19 @@
 /*   By: gcollett <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/16 06:04:25 by gcollett          #+#    #+#             */
-/*   Updated: 2017/02/24 02:57:29 by gcollett         ###   ########.fr       */
+/*   Updated: 2017/03/22 10:35:55 by gcollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-# define BUFF_SIZE 2046 
+# define BUFF_SIZE 10000000
 
 typedef	struct		s_memory
 {
 	int				fd;
 	int				pm;
-	char			buf[BUFF_SIZE + 1];
+	char			*buf;
 	struct s_memory	*next;
 	struct s_memory	*prev;
 }					t_memory;
